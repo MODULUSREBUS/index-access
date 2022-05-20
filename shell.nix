@@ -7,6 +7,8 @@ mkShell {
     git
     hub
     gnumake
+    pkg-config
+    openssl
 
     rust
   ];

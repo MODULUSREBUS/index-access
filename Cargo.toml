@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+  "index-access-s3",
+  "index-access-fs",
+  "index-access-memory",
+  "index-access-storage",
+]
+
+[profile.release]
+lto = true

@@ -1,0 +1,25 @@
+[package]
+name = "index-access-s3"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+index-access-storage = { path = "../index-access-storage" }
+anyhow = "1.0.26"
+async-trait = "0.1.24"
+rust-s3 = "0.30.0"
+opendal = "0.6.0"
+
+[dev-dependencies]
+quickcheck = "0.9.2"
+rand = "0.7.3"
+tokio = { version = "1.18.1", features = ["full"] }
+s3-server = "0.2.0"
+tempfile = "3.1.0"
+hyper = { version = "0.14.18", features = ["server"] }
+futures = "0.3.21"
+
+[[example]]
+name = "s3"
