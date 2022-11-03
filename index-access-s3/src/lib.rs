@@ -7,12 +7,10 @@
 
 //! # index-access-s3
 
-use std::sync::Arc;
 use std::error::Error;
 use async_trait::async_trait;
-use opendal::{Operator, Accessor};
+use opendal::Operator;
 use opendal::services::s3;
-use opendal::services::s3::Builder;
 use index_access_storage::IndexAccess;
 
 /// IndexAccessS3.
@@ -35,7 +33,7 @@ impl IndexAccessS3 {
         secret_key: &str,
         ) -> Result<Self, Box<dyn Error + Send + Sync>>
     {
-        let mut builder: Builder = s3::Backend::build();
+        let mut builder = s3::Builder::default();
         builder.root(root);
         builder.bucket(bucket);
         builder.region(region);
@@ -43,8 +41,7 @@ impl IndexAccessS3 {
         builder.access_key_id(access_key);
         builder.secret_access_key(secret_key);
 
-        let accessor: Arc<dyn Accessor> = builder.finish().await?;
-        let operator = Operator::new(accessor);
+        let operator = Operator::new(builder.build()?);
 
         Ok(Self {
             operator,

@@ -23,5 +23,6 @@ mkShell {
     openssl
 
     rust
+    cargo-edit
   ];
 }

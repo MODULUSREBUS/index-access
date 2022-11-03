@@ -1,14 +1,11 @@
 use std::u8;
 use std::collections::HashMap;
-use rand::Rng;
 use tempfile::Builder;
 use quickcheck::{Arbitrary, Gen};
 use quickcheck_async;
 
 use index_access_storage::IndexAccess;
 use index_access_fs::IndexAccessFs;
-
-const MAX_SIZE: u64 = 10;
 
 #[derive(Clone, Debug)]
 enum Op {
@@ -17,11 +14,12 @@ enum Op {
 }
 
 impl Arbitrary for Op {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
+    fn arbitrary(g: &mut Gen) -> Self {
         let index: String = u32::arbitrary(g).to_string();
-        let length: u64 = g.gen_range(0, MAX_SIZE);
+        let lengths = [0, 1, 5];
+        let length: u64 = *g.choose(&lengths).unwrap();
 
-        if g.gen::<bool>() {
+        if bool::arbitrary(g) {
             Op::Read { index }
         } else {
             let mut data = Vec::with_capacity(length as usize);
