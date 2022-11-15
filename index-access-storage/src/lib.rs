@@ -9,9 +9,11 @@
 //! This module forms a shared interface for reading and writing objects
 //! to different backends.
 
+use async_trait::async_trait;
+
 /// The `IndexAccess` trait allows for reading from and writing to a
 /// index-accessible storage of objects.
-#[async_trait::async_trait]
+#[async_trait]
 pub trait IndexAccess {
   /// An error.
   type Error;
@@ -28,4 +30,24 @@ pub trait IndexAccess {
     &mut self,
     index: String,
   ) -> Result<Vec<u8>, Self::Error>;
+}
+
+#[async_trait]
+impl<T: IndexAccess + Send> IndexAccess for Box<T> {
+    type Error = T::Error;
+
+  async fn write(
+    &mut self,
+    index: String,
+    data: &[u8],
+  ) -> Result<(), Self::Error> {
+      self.write(index, data).await
+  }
+
+  async fn read(
+    &mut self,
+    index: String,
+  ) -> Result<Vec<u8>, Self::Error> {
+      self.read(index).await
+  }
 }
