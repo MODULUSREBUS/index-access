@@ -14,7 +14,7 @@ enum Op {
 
 impl Arbitrary for Op {
     fn arbitrary(g: &mut Gen) -> Self {
-        let index = u32::arbitrary(g);
+        let index = u8::arbitrary(g) as u32;
         let lengths = [0, 1, 2, 50];
         let length: u64 = *g.choose(&lengths).unwrap();
 
@@ -38,8 +38,9 @@ async fn implementation_matches_model(ops: Vec<Op>) -> bool {
     for op in ops {
         match op {
             Op::Read { index } => match implementation.read(index.clone()).await {
-                Ok(data) => assert_eq!(data, *model.get(&index).unwrap()),
-                Err(_) => assert_eq!(None, model.get(&index)),
+                Ok(Some(data)) => assert_eq!(data, *model.get(&index).unwrap()),
+                Ok(None) => assert_eq!(None, model.get(&index)),
+                Err(_) => return false,
             },
             Op::Write { index, data } => {
                 implementation

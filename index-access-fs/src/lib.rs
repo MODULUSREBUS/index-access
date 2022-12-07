@@ -8,14 +8,14 @@
 //! # index-access-fs
 //! Indexed read/write from filesystem.
 
-use anyhow::Result;
 use async_trait::async_trait;
-use std::error::Error;
 use std::path::{Path, PathBuf};
 use tokio::fs::{self, OpenOptions};
 use tokio::io::AsyncWriteExt;
 
 use index_access_storage::IndexAccess;
+
+pub use std::io::{Error, ErrorKind};
 
 /// IndexAccessFs.
 #[derive(Debug, Clone)]
@@ -24,7 +24,7 @@ pub struct IndexAccessFs {
 }
 impl IndexAccessFs {
     /// Create new [IndexAccessFs].
-    pub async fn new(root: &Path) -> Result<Self> {
+    pub async fn new(root: &Path) -> Result<Self, Error> {
         fs::create_dir_all(root).await?;
 
         Ok(Self {
@@ -34,7 +34,7 @@ impl IndexAccessFs {
 }
 #[async_trait]
 impl IndexAccess for IndexAccessFs {
-    type Error = Box<dyn Error + Send + Sync>;
+    type Error = Error;
 
     async fn write(&mut self, index: u32, data: &[u8]) -> Result<(), Self::Error> {
         let path = self.root.join(index.to_string());
@@ -42,20 +42,22 @@ impl IndexAccess for IndexAccessFs {
 
         let mut file = OpenOptions::new()
             .create(true)
-            .read(false)
             .write(true)
+            .truncate(true)
             .open(&path)
             .await?;
         file.write_all(&data).await?;
-        file.set_len(data.len() as u64).await?;
         file.sync_all().await?;
 
         Ok(())
     }
 
-    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error> {
+    async fn read(&mut self, index: u32) -> Result<Option<Vec<u8>>, Self::Error> {
         let path = self.root.join(index.to_string());
-        let data = fs::read(&path).await?;
-        Ok(data)
+        match fs::read(&path).await {
+            Ok(data) => Ok(Some(data)),
+            Err(e) if e.kind() == ErrorKind::NotFound => Ok(None),
+            Err(e) => Err(e),
+        }
     }
 }

@@ -22,7 +22,7 @@ pub trait IndexAccess {
     async fn write(&mut self, index: u32, data: &[u8]) -> Result<(), Self::Error>;
 
     /// Read bytes under index.
-    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error>;
+    async fn read(&mut self, index: u32) -> Result<Option<Vec<u8>>, Self::Error>;
 }
 
 #[async_trait]
@@ -33,7 +33,7 @@ impl<T: IndexAccess + Send> IndexAccess for Box<T> {
         self.write(index, data).await
     }
 
-    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error> {
+    async fn read(&mut self, index: u32) -> Result<Option<Vec<u8>>, Self::Error> {
         self.read(index).await
     }
 }

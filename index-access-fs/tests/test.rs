@@ -20,24 +20,15 @@ async fn can_open_buffer() {
 async fn can_write() {
     let dir = Builder::new().prefix("test_iaf").tempdir().unwrap();
     let mut storage = IndexAccessFs::new(dir.path()).await.unwrap();
-    storage
-        .write(10, b"hello")
-        .await
-        .unwrap();
-    storage
-        .write(20, b"world")
-        .await
-        .unwrap();
+    storage.write(10, b"hello").await.unwrap();
+    storage.write(20, b"world").await.unwrap();
 }
 
 #[test]
 async fn can_read() {
     let dir = Builder::new().prefix("test_iaf").tempdir().unwrap();
     let mut storage = IndexAccessFs::new(dir.path()).await.unwrap();
-    storage
-        .write(10, b"hello world")
-        .await
-        .unwrap();
-    let text = storage.read(10).await.unwrap();
-    assert_eq!(String::from_utf8(text.to_vec()).unwrap(), "hello world");
+    storage.write(10, b"hello world").await.unwrap();
+    let text = storage.read(10).await.unwrap().unwrap();
+    assert_eq!(String::from_utf8_lossy(&text), "hello world");
 }

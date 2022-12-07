@@ -11,7 +11,8 @@ use async_trait::async_trait;
 use index_access_storage::IndexAccess;
 use opendal::services::s3;
 use opendal::Operator;
-use std::error::Error;
+
+pub use opendal::{Error, ErrorKind};
 
 /// IndexAccessS3.
 #[derive(Clone)]
@@ -32,7 +33,7 @@ impl IndexAccessS3 {
         endpoint: &str,
         access_key: &str,
         secret_key: &str,
-    ) -> Result<Self, Box<dyn Error + Send + Sync>> {
+    ) -> Result<Self, Error> {
         let accessor = s3::Builder::default()
             .root(root)
             .bucket(bucket)
@@ -48,7 +49,7 @@ impl IndexAccessS3 {
 }
 #[async_trait]
 impl IndexAccess for IndexAccessS3 {
-    type Error = Box<dyn Error + Send + Sync>;
+    type Error = Error;
 
     async fn write(&mut self, index: u32, data: &[u8]) -> Result<(), Self::Error> {
         let object = self.operator.object(&index.to_string());
@@ -56,9 +57,12 @@ impl IndexAccess for IndexAccessS3 {
         Ok(())
     }
 
-    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error> {
+    async fn read(&mut self, index: u32) -> Result<Option<Vec<u8>>, Self::Error> {
         let object = self.operator.object(&index.to_string());
-        let data = object.read().await?;
-        Ok(data)
+        match object.read().await {
+            Ok(data) => Ok(Some(data)),
+            Err(e) if e.kind() == ErrorKind::ObjectNotFound => Ok(None),
+            Err(e) => Err(e),
+        }
     }
 }

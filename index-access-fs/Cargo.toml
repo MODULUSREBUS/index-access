@@ -7,13 +7,12 @@ edition = "2021"
 
 [dependencies]
 index-access-storage = { path = "../index-access-storage" }
-anyhow = "1.0.66"
-async-trait = "0.1.59"
-tokio = { version = "1.23.0", features = [] }
+async-trait = "0.1"
+tokio = "1.23"
 
 [dev-dependencies]
-tempfile = "3.3.0"
-tokio = { version = "1.23.0", features = ["full"] }
-quickcheck = "1.0.3"
-quickcheck_async = "0.1.1"
-futures = "0.3.25"
+tempfile = "3.3"
+tokio = { version = "1.23", features = ["full"] }
+quickcheck = "1.0"
+quickcheck_async = "0.1"
+futures = "0.3"

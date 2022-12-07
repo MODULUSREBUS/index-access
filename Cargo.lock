@@ -820,7 +820,6 @@ dependencies = [
 name = "index-access-fs"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-trait",
  "futures",
  "index-access-storage",
@@ -834,7 +833,6 @@ dependencies = [
 name = "index-access-memory"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-trait",
  "futures",
  "index-access-storage",
