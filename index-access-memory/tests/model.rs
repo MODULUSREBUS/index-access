@@ -1,10 +1,10 @@
-use std::u8;
-use std::collections::HashMap;
 use quickcheck::{Arbitrary, Gen};
 use quickcheck_async;
+use std::collections::HashMap;
+use std::u8;
 
-use index_access_storage::IndexAccess;
 use index_access_memory::IndexAccessMemory;
+use index_access_storage::IndexAccess;
 
 #[derive(Clone, Debug)]
 enum Op {
@@ -32,22 +32,22 @@ impl Arbitrary for Op {
 
 #[quickcheck_async::tokio]
 async fn implementation_matches_model(ops: Vec<Op>) -> bool {
-    let mut implementation = IndexAccessMemory::new();
+    let mut implementation = IndexAccessMemory::default();
     let mut model = HashMap::<String, Vec<u8>>::new();
 
     for op in ops {
         match op {
-            Op::Read { index } => {
-                match implementation.read(index.clone()).await {
-                    Ok(data) => assert_eq!(data, *model.get(&index).unwrap()),
-                    Err(_) => assert_eq!(None, model.get(&index)),
-                }
+            Op::Read { index } => match implementation.read(index.clone()).await {
+                Ok(data) => assert_eq!(data, *model.get(&index).unwrap()),
+                Err(_) => assert_eq!(None, model.get(&index)),
             },
             Op::Write { index, data } => {
-                implementation.write(index.clone(), &data).await
+                implementation
+                    .write(index.clone(), &data)
+                    .await
                     .expect("Writes should be successful.");
                 let _ = model.insert(index, data);
-            },
+            }
         }
     }
     true

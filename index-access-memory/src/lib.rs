@@ -15,7 +15,7 @@
 //!
 //! # #[tokio::main]
 //! # async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-//! let mut ram = IndexAccessMemory::new();
+//! let mut ram = IndexAccessMemory::default();
 //! ram.write("a".to_string(), b"hello world").await.unwrap();
 //! let text = ram.read("a".to_string()).await.unwrap();
 //! assert_eq!(text, b"hello world");
@@ -24,47 +24,29 @@
 //! ```
 
 use anyhow::anyhow;
-use std::collections::HashMap;
-use std::error::Error;
 use async_trait::async_trait;
 use index_access_storage::IndexAccess;
+use std::collections::HashMap;
+use std::error::Error;
 
 /// IndexAccessMemory.
-#[derive(Debug)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct IndexAccessMemory {
     hashmap: HashMap<String, Vec<u8>>,
 }
-impl IndexAccessMemory {
-    /// Create new IndexAccessMemory.
-    pub fn new() -> Self {
-        Self {
-            hashmap: HashMap::new(),
-        }
-    }
-}
 #[async_trait]
 impl IndexAccess for IndexAccessMemory {
-
     type Error = Box<dyn Error + Send + Sync>;
 
     /// Write object to index.
-    async fn write(
-        &mut self,
-        index: String,
-        data: &[u8],
-        ) -> Result<(), Self::Error>
-    {
+    async fn write(&mut self, index: String, data: &[u8]) -> Result<(), Self::Error> {
         let data = data.to_vec();
         self.hashmap.insert(index, data);
         Ok(())
     }
 
     /// Attempt to read object at index.
-    async fn read(
-        &mut self,
-        index: String,
-        ) -> Result<Vec<u8>, Self::Error>
-    {
+    async fn read(&mut self, index: String) -> Result<Vec<u8>, Self::Error> {
         match self.hashmap.get(&index) {
             None => Err(anyhow!("No value for index : {}.", index).into()),
             Some(data) => Ok(data.clone()),

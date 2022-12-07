@@ -1,11 +1,11 @@
-use std::u8;
-use std::collections::HashMap;
-use tempfile::Builder;
 use quickcheck::{Arbitrary, Gen};
 use quickcheck_async;
+use std::collections::HashMap;
+use std::u8;
+use tempfile::Builder;
 
-use index_access_storage::IndexAccess;
 use index_access_fs::IndexAccessFs;
+use index_access_storage::IndexAccess;
 
 #[derive(Clone, Debug)]
 enum Op {
@@ -33,27 +33,23 @@ impl Arbitrary for Op {
 
 #[quickcheck_async::tokio]
 async fn implementation_matches_model(ops: Vec<Op>) -> bool {
-    let dir = Builder::new()
-        .prefix("test_model_iaf").tempdir().unwrap();
-    let mut implementation =
-        IndexAccessFs::new(dir.path()).await.unwrap();
+    let dir = Builder::new().prefix("test_model_iaf").tempdir().unwrap();
+    let mut implementation = IndexAccessFs::new(dir.path()).await.unwrap();
     let mut model = HashMap::<String, Vec<u8>>::new();
 
     for op in ops {
         match op {
-            Op::Read { index } => {
-                match implementation.read(index.clone()).await {
-                    Ok(data) => assert_eq!(
-                        data,
-                        *model.get(&index).unwrap()),
-                    Err(_) => assert_eq!(None, model.get(&index)),
-                }
+            Op::Read { index } => match implementation.read(index.clone()).await {
+                Ok(data) => assert_eq!(data, *model.get(&index).unwrap()),
+                Err(_) => assert_eq!(None, model.get(&index)),
             },
             Op::Write { index, data } => {
-                implementation.write(index.clone(), &data).await
+                implementation
+                    .write(index.clone(), &data)
+                    .await
                     .expect("Writes should be successful.");
                 let _ = model.insert(index, data);
-            },
+            }
         }
     }
     true

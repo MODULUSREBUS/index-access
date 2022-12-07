@@ -6,24 +6,24 @@
 #![cfg_attr(test, deny(warnings))]
 
 //! # index-access-fs
-//! Read/write fs.
+//! Indexed read/write from filesystem.
 
 use anyhow::Result;
-use std::path::{PathBuf, Path};
-use std::error::Error;
 use async_trait::async_trait;
+use std::error::Error;
+use std::path::{Path, PathBuf};
 use tokio::fs::{self, OpenOptions};
 use tokio::io::AsyncWriteExt;
 
 use index_access_storage::IndexAccess;
 
 /// IndexAccessFs.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IndexAccessFs {
     root: PathBuf,
 }
 impl IndexAccessFs {
-    /// Returns [IndexAccessFs].
+    /// Create new [IndexAccessFs].
     pub async fn new(root: &Path) -> Result<Self> {
         fs::create_dir_all(root).await?;
 
@@ -34,16 +34,9 @@ impl IndexAccessFs {
 }
 #[async_trait]
 impl IndexAccess for IndexAccessFs {
-
     type Error = Box<dyn Error + Send + Sync>;
 
-    /// Write object to index.
-    async fn write(
-        &mut self,
-        index: String,
-        data: &[u8],
-        ) -> Result<(), Self::Error>
-    {
+    async fn write(&mut self, index: String, data: &[u8]) -> Result<(), Self::Error> {
         let path = self.root.join(index);
         let data = data.to_vec();
 
@@ -60,16 +53,9 @@ impl IndexAccess for IndexAccessFs {
         Ok(())
     }
 
-    /// Attempt to read object at index.
-    async fn read(
-        &mut self,
-        index: String,
-        ) -> Result<Vec<u8>, Self::Error>
-    {
+    async fn read(&mut self, index: String) -> Result<Vec<u8>, Self::Error> {
         let path = self.root.join(index);
-
         let data = fs::read(&path).await?;
-
         Ok(data)
     }
 }

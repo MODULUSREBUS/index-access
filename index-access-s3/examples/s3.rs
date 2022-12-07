@@ -1,7 +1,7 @@
 use anyhow::Result;
-use std::env;
 use index_access_s3::IndexAccessS3;
 use index_access_storage::IndexAccess;
+use std::env;
 
 #[tokio::main]
 pub async fn main() -> Result<()> {
@@ -12,9 +12,8 @@ pub async fn main() -> Result<()> {
     let access_key = env::var("S3_ACCESS_KEY")?;
     let secret_key = env::var("S3_SECRET_KEY")?;
 
-    let mut ias3 = IndexAccessS3::new(
-        &root, &bucket, &region, &endpoint, &access_key, &secret_key
-        ).await.unwrap();
+    let mut ias3 =
+        IndexAccessS3::new(&root, &bucket, &region, &endpoint, &access_key, &secret_key).unwrap();
 
     ias3.write("hello".to_owned(), b"world").await.unwrap();
     let data = ias3.read("hello".to_owned()).await.unwrap();

@@ -1,16 +1,16 @@
-use tokio::{test, task};
-use std::mem::drop;
 use futures::future;
-use tempfile::Builder;
-use std::net::TcpListener;
+use hyper::server::Server;
+use hyper::service::make_service_fn;
 use s3_server::storages::fs::FileSystem;
 use s3_server::S3Service;
 use s3_server::SimpleAuth;
-use hyper::server::Server;
-use hyper::service::make_service_fn;
+use std::mem::drop;
+use std::net::TcpListener;
+use tempfile::Builder;
+use tokio::{task, test};
 
-use index_access_storage::IndexAccess;
 use index_access_s3::IndexAccessS3;
+use index_access_storage::IndexAccess;
 
 #[test]
 async fn can_create_new() {
@@ -23,20 +23,13 @@ async fn can_create_new() {
     let server = {
         let service = service.into_shared();
         let listener = TcpListener::bind("localhost:9018").unwrap();
-        let make_service: _ = make_service_fn(
-            move |_| future::ready(Ok::<_, anyhow::Error>(service.clone())));
+        let make_service: _ =
+            make_service_fn(move |_| future::ready(Ok::<_, anyhow::Error>(service.clone())));
         Server::from_tcp(listener).unwrap().serve(make_service)
     };
     let server = task::spawn(server);
 
-    let _ias3 = IndexAccessS3::new(
-        "/",
-        "bucket",
-        "nyc",
-        "http://127.0.0.1:9017",
-        "",
-        ""
-        ).await.unwrap();
+    let _ias3 = IndexAccessS3::new("/", "bucket", "nyc", "http://127.0.0.1:9017", "", "").unwrap();
     drop(server);
 }
 
@@ -57,8 +50,8 @@ async fn can_write() {
     let server = {
         let service = service.into_shared();
         let listener = TcpListener::bind("localhost:9018").unwrap();
-        let make_service: _ = make_service_fn(
-            move |_| future::ready(Ok::<_, anyhow::Error>(service.clone())));
+        let make_service: _ =
+            make_service_fn(move |_| future::ready(Ok::<_, anyhow::Error>(service.clone())));
         Server::from_tcp(listener).unwrap().serve(make_service)
     };
     let server = task::spawn(server);
@@ -70,7 +63,9 @@ async fn can_write() {
         "nyc",
         "http://localhost:9018",
         &access_key,
-        &secret_key).await.unwrap();
+        &secret_key,
+    )
+    .unwrap();
 
     // run
     ias3.write("test".to_owned(), b"hello world").await.unwrap();
@@ -95,8 +90,8 @@ async fn can_read() {
     let server = {
         let service = service.into_shared();
         let listener = TcpListener::bind("localhost:9019").unwrap();
-        let make_service: _ = make_service_fn(
-            move |_| future::ready(Ok::<_, anyhow::Error>(service.clone())));
+        let make_service: _ =
+            make_service_fn(move |_| future::ready(Ok::<_, anyhow::Error>(service.clone())));
         Server::from_tcp(listener).unwrap().serve(make_service)
     };
     let server = task::spawn(server);
@@ -108,7 +103,9 @@ async fn can_read() {
         "nyc",
         "http://localhost:9019",
         &access_key,
-        &secret_key).await.unwrap();
+        &secret_key,
+    )
+    .unwrap();
 
     // run
     ias3.write("test".to_owned(), data).await.unwrap();
