@@ -15,9 +15,10 @@ pub async fn main() -> Result<()> {
     let mut ias3 =
         IndexAccessS3::new(&root, &bucket, &region, &endpoint, &access_key, &secret_key).unwrap();
 
-    ias3.write("hello".to_owned(), b"world").await.unwrap();
-    let data = ias3.read("hello".to_owned()).await.unwrap();
-    println!("hello : {}", String::from_utf8_lossy(&data));
+    ias3.write(0, b"s3").await.unwrap();
+    let data = ias3.read(0).await.unwrap();
+
+    println!("hello {}", String::from_utf8_lossy(&data));
 
     Ok(())
 }

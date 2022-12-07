@@ -13,7 +13,7 @@ async fn can_call_new() {
 async fn can_open_buffer() {
     let dir = Builder::new().prefix("test_iaf").tempdir().unwrap();
     let mut storage = IndexAccessFs::new(dir.path()).await.unwrap();
-    storage.write(String::from("open"), b"hello").await.unwrap();
+    storage.write(0, b"hello").await.unwrap();
 }
 
 #[test]
@@ -21,11 +21,11 @@ async fn can_write() {
     let dir = Builder::new().prefix("test_iaf").tempdir().unwrap();
     let mut storage = IndexAccessFs::new(dir.path()).await.unwrap();
     storage
-        .write(String::from("write1"), b"hello")
+        .write(10, b"hello")
         .await
         .unwrap();
     storage
-        .write(String::from("write2"), b"world")
+        .write(20, b"world")
         .await
         .unwrap();
 }
@@ -35,9 +35,9 @@ async fn can_read() {
     let dir = Builder::new().prefix("test_iaf").tempdir().unwrap();
     let mut storage = IndexAccessFs::new(dir.path()).await.unwrap();
     storage
-        .write(String::from("read"), b"hello world")
+        .write(10, b"hello world")
         .await
         .unwrap();
-    let text = storage.read(String::from("read")).await.unwrap();
+    let text = storage.read(10).await.unwrap();
     assert_eq!(String::from_utf8(text.to_vec()).unwrap(), "hello world");
 }

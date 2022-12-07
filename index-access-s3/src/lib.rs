@@ -33,15 +33,15 @@ impl IndexAccessS3 {
         access_key: &str,
         secret_key: &str,
     ) -> Result<Self, Box<dyn Error + Send + Sync>> {
-        let mut builder = s3::Builder::default();
-        builder.root(root);
-        builder.bucket(bucket);
-        builder.region(region);
-        builder.endpoint(endpoint);
-        builder.access_key_id(access_key);
-        builder.secret_access_key(secret_key);
-
-        let operator = Operator::new(builder.build()?);
+        let accessor = s3::Builder::default()
+            .root(root)
+            .bucket(bucket)
+            .region(region)
+            .endpoint(endpoint)
+            .access_key_id(access_key)
+            .secret_access_key(secret_key)
+            .build()?;
+        let operator = Operator::new(accessor);
 
         Ok(Self { operator })
     }
@@ -50,14 +50,14 @@ impl IndexAccessS3 {
 impl IndexAccess for IndexAccessS3 {
     type Error = Box<dyn Error + Send + Sync>;
 
-    async fn write(&mut self, index: String, data: &[u8]) -> Result<(), Self::Error> {
-        let object = self.operator.object(&index);
+    async fn write(&mut self, index: u32, data: &[u8]) -> Result<(), Self::Error> {
+        let object = self.operator.object(&index.to_string());
         object.write(data).await?;
         Ok(())
     }
 
-    async fn read(&mut self, index: String) -> Result<Vec<u8>, Self::Error> {
-        let object = self.operator.object(&index);
+    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error> {
+        let object = self.operator.object(&index.to_string());
         let data = object.read().await?;
         Ok(data)
     }

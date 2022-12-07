@@ -18,22 +18,22 @@ pub trait IndexAccess {
     /// An error.
     type Error;
 
-    /// Write bytes at an offset to the backend.
-    async fn write(&mut self, index: String, data: &[u8]) -> Result<(), Self::Error>;
+    /// Write bytes under index.
+    async fn write(&mut self, index: u32, data: &[u8]) -> Result<(), Self::Error>;
 
-    /// Read a sequence of bytes at an offset from the backend.
-    async fn read(&mut self, index: String) -> Result<Vec<u8>, Self::Error>;
+    /// Read bytes under index.
+    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error>;
 }
 
 #[async_trait]
 impl<T: IndexAccess + Send> IndexAccess for Box<T> {
     type Error = T::Error;
 
-    async fn write(&mut self, index: String, data: &[u8]) -> Result<(), Self::Error> {
+    async fn write(&mut self, index: u32, data: &[u8]) -> Result<(), Self::Error> {
         self.write(index, data).await
     }
 
-    async fn read(&mut self, index: String) -> Result<Vec<u8>, Self::Error> {
+    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error> {
         self.read(index).await
     }
 }

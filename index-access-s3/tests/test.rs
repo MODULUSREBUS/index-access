@@ -68,7 +68,7 @@ async fn can_write() {
     .unwrap();
 
     // run
-    ias3.write("test".to_owned(), b"hello world").await.unwrap();
+    ias3.write(0, b"hello world").await.unwrap();
     drop(server);
 }
 
@@ -108,8 +108,9 @@ async fn can_read() {
     .unwrap();
 
     // run
-    ias3.write("test".to_owned(), data).await.unwrap();
-    let read = ias3.read("test".to_owned()).await.unwrap();
+    let index: u32 = 100000;
+    ias3.write(index, data).await.unwrap();
+    let read = ias3.read(index).await.unwrap();
     assert_eq!(read, data);
     drop(server);
 }

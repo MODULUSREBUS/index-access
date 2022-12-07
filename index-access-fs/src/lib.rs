@@ -36,8 +36,8 @@ impl IndexAccessFs {
 impl IndexAccess for IndexAccessFs {
     type Error = Box<dyn Error + Send + Sync>;
 
-    async fn write(&mut self, index: String, data: &[u8]) -> Result<(), Self::Error> {
-        let path = self.root.join(index);
+    async fn write(&mut self, index: u32, data: &[u8]) -> Result<(), Self::Error> {
+        let path = self.root.join(index.to_string());
         let data = data.to_vec();
 
         let mut file = OpenOptions::new()
@@ -53,8 +53,8 @@ impl IndexAccess for IndexAccessFs {
         Ok(())
     }
 
-    async fn read(&mut self, index: String) -> Result<Vec<u8>, Self::Error> {
-        let path = self.root.join(index);
+    async fn read(&mut self, index: u32) -> Result<Vec<u8>, Self::Error> {
+        let path = self.root.join(index.to_string());
         let data = fs::read(&path).await?;
         Ok(data)
     }
