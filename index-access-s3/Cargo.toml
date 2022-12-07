@@ -8,17 +8,16 @@ edition = "2021"
 [dependencies]
 index-access-storage = { path = "../index-access-storage" }
 anyhow = "1.0.66"
-async-trait = "0.1.58"
+async-trait = "0.1.59"
 rust-s3 = "0.32.3"
-opendal = "0.19.7"
+opendal = "0.22.2"
 
 [dev-dependencies]
 quickcheck = "1.0.3"
-rand = "0.8.5"
-tokio = { version = "1.21.2", features = ["full"] }
+tokio = { version = "1.23.0", features = ["full"] }
 s3-server = "0.2.0"
 tempfile = "3.3.0"
-hyper = { version = "0.14.22", features = ["server"] }
+hyper = { version = "0.14.23", features = ["server"] }
 futures = "0.3.25"
 
 [[example]]

@@ -26,7 +26,9 @@
           rust-analyzer
           cargo-edit
 
+          pkg-config
           gcc
+          openssl.dev
         ];
         commands = [
           {
@@ -39,6 +41,12 @@
                 -A clippy::doc_markdown \
                 -A clippy::missing_errors_doc
             '';
+          }
+        ];
+        env = [
+          {
+            name = "PKG_CONFIG_PATH";
+            prefix = "$DEVSHELL_DIR/lib/pkgconfig";
           }
         ];
       };
